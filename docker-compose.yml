@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - '3000:3000'
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', 'http://localhost:3000']
+      interval: 5s
+      retries: 5
+      start_period: 3s
+    networks:
+      - appnet
+
+  newman:
+    build:
+      context: .
+      dockerfile: Dockerfile.newman
+    depends_on:
+      app:
+        condition: service_healthy
+    volumes:
+      - ./test/api-collection/lost-in-europe.postman_collection.json:/etc/newman/collection.json:ro
+      - ./test/api-collection/lost-in-europe.docker.postman_environment.json:/etc/newman/environment.json:ro
+      - ./reports:/etc/newman
+    command: >
+      run /etc/newman/collection.json 
+      --environment /etc/newman/environment.json 
+      --timeout-request 10000 
+      --delay-request 500 
+      --reporters cli,json,html 
+      --reporter-json-export /etc/newman/report.json 
+      --reporter-html-export /etc/newman/report.html
+    networks:
+      - appnet
+
+networks:
+  appnet:

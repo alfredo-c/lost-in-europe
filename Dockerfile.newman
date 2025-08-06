@@ -1,0 +1,4 @@
+FROM postman/newman:latest
+
+# Install HTML reporter globally
+RUN npm install -g newman-reporter-html
