@@ -41,6 +41,20 @@ export class TicketsController {
   @Get(':id')
   @ApiOperation({ summary: 'Get stored itinerary by ID' })
   @ApiResponse({ status: 200, type: [TicketDto] })
+  @ApiResponse({
+    status: 404,
+    description: 'Itinerary not found',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 404,
+          message:
+            "Itinerary with ID 'c3e0acf9-f4ab-4e69-9bd4-6a3e5abe0251a' not found",
+          error: 'Not Found',
+        },
+      },
+    },
+  })
   async get(@Param('id') id: string): Promise<TicketDto[]> {
     return this.ticketsService.getItinerary(id);
   }
@@ -48,6 +62,20 @@ export class TicketsController {
   @Get(':id/human-readable')
   @ApiOperation({
     summary: 'Get human-readable instructions for the itinerary',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Itinerary not found',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 404,
+          message:
+            "Itinerary with ID 'c3e0acf9-f4ab-4e69-9bd4-6a3e5abe0251a' not found",
+          error: 'Not Found',
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 200,

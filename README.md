@@ -1,29 +1,11 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+LOST IN EUROPE
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+API that creates an ordered itinerary based on unsorted tickets.
+Uses a linear-time sorting algorithm (O(n)) that reconstructs the trip by mapping each ticket's start location to the ticket and then following the chain from the unique start point.
+
+The approach uses a Map and Set to find the itinerary start and sort tickets in one pass.
 
 ## Project setup
 
@@ -34,6 +16,10 @@ $ npm install
 ## Compile and run the project
 
 ```bash
+# Start the required Docker services:
+$ npm run docker:build
+$ npm run docker:db:up
+
 # development
 $ npm run start
 
@@ -51,48 +37,74 @@ $ npm run start:prod
 $ npm run test
 
 # e2e tests
+# Start the required Docker services:
+$ npm run docker:e2e:up
 $ npm run test:e2e
+
+# services tests
+# Start the required Docker services:
+# Will prepare the db, app, run the postman collection
+$ npm run docker:up
 
 # test coverage
 $ npm run test:cov
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Migration
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# run docker-compose.db.yml to make db avaiable then create and run
+# change [name_you_want] to what the name you want for your new migration
+$ npm run migration:generate:name [name_you_want]
+$ npm run migration:run
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## API Documentation and Mock Integration
+
+This project integrates Swagger UI to provide comprehensive, interactive API documentation.
+
+- **Input and Output Schemas:** Swagger defines request parameters, body schemas, and response formats for each endpoint.
+- **Interactive Testing:** Developers can test API endpoints directly from the Swagger UI without needing a separate client.
+- **Mock Integration:** The detailed request/response models make it easy for frontend or integration teams to create mocks and stubs based on the exact API contract.
+- **Error Handling Documentation:** Error responses, such as 404 Not Found, include example payloads so consumers know what to expect on failures.
+
+To access the Swagger documentation, run the application and open:
+
+```bash
+http://localhost:3000/api
+```
 
 ## Resources
 
-Check out a few resources that may come in handy when working with NestJS:
+- NestJS
+- PostgreSQL
+- TypeORM
+- Docker
+- Jest
+- Swagger
+- ESlint
+- Prettier
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Possibles improvement on the system design
 
-## Support
+- Use the Command pattern for extensible operations and segregate writes from reads.
+- Use event-driven architecture with Kafka: create events with pending status; workers process and update to finished, to make it scalable.
+- The system is prepare to extend another types using the factory pattern.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+---
 
-## Stay in touch
+## Algorithm & Patterns used in TicketsService.sortTickets
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+The algorithm to sort tickets:
 
-## License
+1. Creates a Map (`fromMap`) from each ticket's `from` location to the ticket.
+2. Creates a Set (`toSet`) of all `to` locations.
+3. Finds the unique itinerary start by locating a `from` location not present in `toSet`.
+4. Iteratively follows the itinerary from start, retrieving each next ticket from the Map until no next leg is found.
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- This has **O(n)** time complexity because each ticket is processed once.
+- Uses **Map** and **Set** for constant-time lookups.
+- Applies the **Factory pattern** for formatting tickets of different types (`TicketFormatterFactory`).
+- Data persistence via TypeORM repository, creating entities with an `order` property for DB retrieval.
+- Throws exceptions for invalid itineraries or missing data.
+- Uses UUIDs to uniquely identify each generated itinerary.
