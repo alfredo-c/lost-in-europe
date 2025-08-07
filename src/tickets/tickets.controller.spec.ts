@@ -22,8 +22,8 @@ describe('TicketsController', () => {
           useValue: {
             sortTickets: jest
               .fn()
-              .mockReturnValue({ id: 'test-id', sorted: mockSortedTickets }),
-            getItinerary: jest.fn().mockReturnValue(mockSortedTickets),
+              .mockResolvedValue({ id: 'test-id', sorted: mockSortedTickets }),
+            getItinerary: jest.fn().mockResolvedValue(mockSortedTickets),
             getHumanReadableItinerary: jest
               .fn()
               .mockReturnValue(['some string']),
@@ -36,7 +36,7 @@ describe('TicketsController', () => {
     service = module.get<TicketsService>(TicketsService);
   });
 
-  it('should call service.sortTickets and return sorted itinerary with ID', () => {
+  it('should call service.sortTickets and return sorted itinerary with ID', async () => {
     const payload = {
       tickets: [
         { from: 'B', to: 'C', type: 'train', metadata: {} } as TicketDto,
@@ -44,7 +44,7 @@ describe('TicketsController', () => {
       ],
     };
 
-    const result = controller.sort(payload);
+    const result = await controller.sort(payload);
     expect(service.sortTickets).toHaveBeenCalledWith(payload.tickets);
     expect(result).toEqual({
       id: 'test-id',
@@ -52,20 +52,26 @@ describe('TicketsController', () => {
     });
   });
 
-  it('should call service.getItinerary and return the itinerary by id', () => {
-    const result = controller.get('test-id');
+  it('should call service.getItinerary and return the itinerary by id', async () => {
+    const result = await controller.get('test-id');
     expect(service.getItinerary).toHaveBeenCalledWith('test-id');
     expect(result).toEqual(mockSortedTickets);
   });
 
-  it('should throw NotFoundException when itinerary not found in get()', () => {
-    jest.spyOn(service, 'getItinerary').mockReturnValue(undefined);
+  it('should throw NotFoundException when itinerary not found in get()', async () => {
+    jest
+      .spyOn(service, 'getItinerary')
+      .mockRejectedValue(
+        new NotFoundException(`Itinerary with ID 'invalid-id' not found`),
+      );
 
-    expect(() => controller.get('invalid-id')).toThrow(NotFoundException);
+    await expect(controller.get('invalid-id')).rejects.toThrow(
+      NotFoundException,
+    );
   });
 
-  it('should call getHumanReadable and return human-readable itinerary', () => {
-    const result = controller.getHumanReadable('test-id');
+  it('should call getHumanReadable and return human-readable itinerary', async () => {
+    const result = await controller.getHumanReadable('test-id');
     expect(service.getItinerary).toHaveBeenCalledWith('test-id');
     expect(service.getHumanReadableItinerary).toHaveBeenCalledWith(
       mockSortedTickets,
@@ -73,10 +79,14 @@ describe('TicketsController', () => {
     expect(result).toEqual(['some string']);
   });
 
-  it('should throw NotFoundException when itinerary not found in getHumanReadable()', () => {
-    jest.spyOn(service, 'getItinerary').mockReturnValue(undefined);
+  it('should throw NotFoundException when itinerary not found in getHumanReadable()', async () => {
+    jest
+      .spyOn(service, 'getItinerary')
+      .mockRejectedValue(
+        new NotFoundException(`Itinerary with ID 'invalid-id' not found`),
+      );
 
-    expect(() => controller.getHumanReadable('invalid-id')).toThrow(
+    await expect(controller.getHumanReadable('invalid-id')).rejects.toThrow(
       NotFoundException,
     );
   });

@@ -16,4 +16,10 @@ export class Ticket {
 
   @Column('jsonb', { nullable: true })
   metadata: Record<string, string>;
+
+  @Column()
+  itineraryId: string;
+
+  @Column()
+  order: number;
 }

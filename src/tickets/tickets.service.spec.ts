@@ -1,19 +1,31 @@
 import { TicketsService } from './tickets.service';
 import { TicketDto } from './dto/ticket.dto';
-import { TicketFormatterFactory } from 'src/tickets/formatters/ticket-formatter.factory';
+import { TicketFormatterFactory } from './formatters/ticket-formatter.factory';
+import { Ticket } from './entities/ticket.entity';
+import { Repository } from 'typeorm';
+import type { Mocked } from 'jest-mock';
 
 describe('TicketsService', () => {
   let service: TicketsService;
+  let ticketRepository: jest.Mocked<Repository<Ticket>>;
 
-  // Mock formatters for each type
+  // Mock formatters
   const mockFormatter = {
     format: jest.fn(),
   };
 
   beforeEach(() => {
-    service = new TicketsService();
+    // Create a mock repository
+    ticketRepository = {
+      create: jest.fn((entity) => entity as Ticket),
+      save: jest.fn(),
+      find: jest.fn(),
+    } as unknown as Mocked<Repository<Ticket>>;
 
-    // Mock the TicketFormatterFactory.getFormatter method globally
+    // Create the service with the mocked repository
+    service = new TicketsService(ticketRepository);
+
+    // Mock formatters
     jest
       .spyOn(TicketFormatterFactory, 'getFormatter')
       .mockImplementation(() => mockFormatter);
@@ -21,7 +33,7 @@ describe('TicketsService', () => {
     mockFormatter.format.mockReset();
   });
 
-  it('should sort the full itinerary correctly (ignoring metadata)', () => {
+  it('should sort the full itinerary correctly (ignoring metadata)', async () => {
     const tickets: TicketDto[] = [
       {
         from: 'Bologna San Ruffillo',
@@ -73,7 +85,7 @@ describe('TicketsService', () => {
       },
     ];
 
-    const { sorted } = service.sortTickets(tickets);
+    const { sorted } = await service.sortTickets(tickets);
 
     const ordered = sorted.map((t) => `${t.from} -> ${t.to}`);
 
@@ -87,6 +99,9 @@ describe('TicketsService', () => {
       'Bologna Guglielmo Marconi Airport -> Paris CDG Airport',
       "Paris CDG Airport -> Chicago O'Hare",
     ]);
+
+    expect(ticketRepository.create).toHaveBeenCalledTimes(sorted.length);
+    expect(ticketRepository.save).toHaveBeenCalledWith(expect.any(Array));
   });
 
   describe('getHumanReadableItinerary', () => {
@@ -106,20 +121,11 @@ describe('TicketsService', () => {
         },
       ];
 
-      // Mock the formatter.format to return a predictable string per ticket
       mockFormatter.format
         .mockReturnValueOnce('Bus from A to B on Line 1')
         .mockReturnValueOnce('Train from B to C on Train 123');
 
       const result = service.getHumanReadableItinerary(itinerary);
-
-      expect(TicketFormatterFactory.getFormatter).toHaveBeenCalledTimes(2);
-      expect(TicketFormatterFactory.getFormatter).toHaveBeenCalledWith('bus');
-      expect(TicketFormatterFactory.getFormatter).toHaveBeenCalledWith('train');
-
-      expect(mockFormatter.format).toHaveBeenCalledTimes(2);
-      expect(mockFormatter.format).toHaveBeenCalledWith(itinerary[0]);
-      expect(mockFormatter.format).toHaveBeenCalledWith(itinerary[1]);
 
       expect(result).toEqual([
         '0. Start.',

@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  NotFoundException,
-  Param,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { TicketsService } from './tickets.service';
 import { SortTicketsDto } from './dto/sort-tickets.dto';
 import { TicketDto } from './dto/ticket.dto';
@@ -15,27 +8,20 @@ export class TicketsController {
   constructor(private readonly ticketsService: TicketsService) {}
 
   @Post('sort')
-  sort(@Body() body: SortTicketsDto): { id: string; sorted: TicketDto[] } {
+  async sort(
+    @Body() body: SortTicketsDto,
+  ): Promise<{ id: string; sorted: TicketDto[] }> {
     return this.ticketsService.sortTickets(body.tickets);
   }
 
   @Get(':id')
-  get(@Param('id') id: string): TicketDto[] {
-    const itinerary = this.ticketsService.getItinerary(id);
-    if (!itinerary) {
-      throw new NotFoundException(`Itinerary with ID '${id}' not found`);
-    }
-    return itinerary;
+  async get(@Param('id') id: string): Promise<TicketDto[]> {
+    return this.ticketsService.getItinerary(id);
   }
 
   @Get(':id/human-readable')
-  getHumanReadable(@Param('id') id: string): string[] {
-    const itinerary = this.ticketsService.getItinerary(id);
-
-    if (!itinerary) {
-      throw new NotFoundException(`Itinerary with ID '${id}' not found`);
-    }
-
+  async getHumanReadable(@Param('id') id: string): Promise<string[]> {
+    const itinerary = await this.ticketsService.getItinerary(id);
     return this.ticketsService.getHumanReadableItinerary(itinerary);
   }
 }
