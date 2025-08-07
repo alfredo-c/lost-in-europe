@@ -7,28 +7,113 @@
 	},
 	"item": [
 		{
-			"name": "itinerary",
+			"name": "tickets",
 			"item": [
 				{
-					"name": "hello-world",
+					"name": "sort",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response status code is 200\", function () {\r",
-									"    pm.expect(pm.response.code).to.equal(200);\r",
+									"const responseData = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response status code is 201\", function () {\r",
+									"    pm.expect(pm.response.code).to.equal(201);\r",
 									"});\r",
 									"\r",
 									"\r",
-									"pm.test(\"Response time is less than 200ms\", function () {\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"pm.test(\"Response has required fields\", function () {    \r",
+									"    pm.expect(responseData).to.be.an('object');\r",
+									"    pm.expect(responseData).to.have.all.keys('id', 'sorted');\r",
+									"\r",
+									"    // Set the itineraryId variable based on responseData.id\r",
+									"    pm.environment.set(\"itineraryId\", responseData.id);    \r",
 									"});\r",
 									"\r",
 									"\r",
-									"pm.test(\"Response body contains 'Hello World!'\", function () {\r",
-									"    pm.expect(pm.response.text()).to.include(\"Hello World!\");\r",
+									"pm.test(\"Validate the schema of the sorted array elements\", function () {    \r",
+									"    pm.expect(responseData).to.be.an('object');\r",
+									"    pm.expect(responseData.sorted).to.be.an('array').that.is.not.empty;\r",
+									"\r",
+									"    responseData.sorted.forEach(function(item) {\r",
+									"        pm.expect(item).to.be.an('object');\r",
+									"        pm.expect(item).to.have.all.keys('from', 'to', 'type', 'metadata');\r",
+									"        pm.expect(item.from).to.be.a('string').that.is.not.empty;\r",
+									"        pm.expect(item.to).to.be.a('string').that.is.not.empty;\r",
+									"        pm.expect(item.type).to.be.a('string').that.is.not.empty;\r",
+									"        pm.expect(item.metadata).to.be.an('object');\r",
+									"    });\r",
 									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response time is less than 500ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"// Test the response status code\r",
+									"pm.test(\"Response status code is 201\", function () {\r",
+									"    pm.expect(pm.response.code).to.equal(201);\r",
+									"});\r",
+									"\r",
+									"// Test for required fields in the response\r",
+									"pm.test(\"Response has required fields\", function () {\r",
+									"    pm.expect(responseData).to.be.an('object');\r",
+									"    pm.expect(responseData).to.have.all.keys('id', 'sorted');\r",
+									"});\r",
+									"\r",
+									"// Validate the schema of the sorted array elements\r",
+									"pm.test(\"Validate the schema of the sorted array elements\", function () {\r",
+									"    pm.expect(responseData.sorted).to.be.an('array').that.is.not.empty;\r",
+									"    \r",
+									"    responseData.sorted.forEach(function(item) {\r",
+									"        pm.expect(item).to.be.an('object');\r",
+									"        pm.expect(item).to.have.all.keys('from', 'to', 'type', 'metadata');\r",
+									"        pm.expect(item.from).to.be.a('string').that.is.not.empty;\r",
+									"        pm.expect(item.to).to.be.a('string').that.is.not.empty;\r",
+									"        pm.expect(item.type).to.be.a('string').that.is.not.empty;\r",
+									"        pm.expect(item.metadata).to.be.an('object');\r",
+									"    });\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"tickets\": [\r\n        {\r\n            \"from\": \"St. Anton am Arlberg Bahnhof\",\r\n            \"to\": \"Innsbruck Hbf\",\r\n            \"type\": \"train\",\r\n            \"metadata\": {\r\n                \"train\": \"RJX 765\",\r\n                \"platform\": \"3\",\r\n                \"seat\": \"17C\"\r\n            }\r\n        },\r\n        {\r\n            \"from\": \"Innsbruck Hbf\",\r\n            \"to\": \"Innsbruck Airport\",\r\n            \"type\": \"tram\",\r\n            \"metadata\": {\r\n                \"line\": \"S5\"\r\n            }\r\n        },\r\n        {\r\n            \"from\": \"Innsbruck Airport\",\r\n            \"to\": \"Venice Airport\",\r\n            \"type\": \"flight\",\r\n            \"metadata\": {\r\n                \"flight\": \"AA904\",\r\n                \"gate\": \"10\",\r\n                \"seat\": \"18B\",\r\n                \"luggage\": \"Self-check-in luggage at counter.\"\r\n            }\r\n        },\r\n        {\r\n            \"from\": \"Venice Airport\",\r\n            \"to\": \"Bologna San Ruffillo\",\r\n            \"type\": \"train\",\r\n            \"metadata\": {\r\n                \"train\": \"ICN 35780\",\r\n                \"platform\": \"1\",\r\n                \"seat\": \"13F\"\r\n            }\r\n        },\r\n        {\r\n            \"from\": \"Bologna San Ruffillo\",\r\n            \"to\": \"Bologna Guglielmo Marconi Airport\",\r\n            \"type\": \"bus\",\r\n            \"metadata\": {\r\n                \"label\": \"airport bus\"\r\n            }\r\n        },\r\n        {\r\n            \"from\": \"Bologna Guglielmo Marconi Airport\",\r\n            \"to\": \"Paris CDG Airport\",\r\n            \"type\": \"flight\",\r\n            \"metadata\": {\r\n                \"flight\": \"AF1229\",\r\n                \"gate\": \"22\",\r\n                \"seat\": \"10A\",\r\n                \"luggage\": \"Self-check-in luggage at counter.\"\r\n            }\r\n        },\r\n        {\r\n            \"from\": \"Paris CDG Airport\",\r\n            \"to\": \"Chicago O'Hare\",\r\n            \"type\": \"flight\",\r\n            \"metadata\": {\r\n                \"flight\": \"AF136\",\r\n                \"gate\": \"32\",\r\n                \"seat\": \"10A\",\r\n                \"luggage\": \"Luggage will transfer automatically from the last flight.\"\r\n            }\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/tickets/sort",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tickets",
+								"sort"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ordered",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
 									""
 								],
 								"type": "text/javascript",
@@ -40,15 +125,101 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}",
+							"raw": "{{baseUrl}}/tickets/:id",
 							"host": [
 								"{{baseUrl}}"
+							],
+							"path": [
+								"tickets",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{itineraryId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "human-readable",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/tickets/:id/human-readable",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tickets",
+								":id",
+								"human-readable"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{itineraryId}}"
+								}
 							]
 						}
 					},
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "hello-world",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response time is less than 200ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response body contains 'Hello World!'\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"Hello World!\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}",
+					"host": [
+						"{{baseUrl}}"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }
