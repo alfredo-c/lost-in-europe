@@ -20,7 +20,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "docker:down:clean": "docker compose down --rmi all --volumes --remove-orphans",
     "docker:down": "docker compose down",
-    "docker:up": "docker compose up --build app"
+    "docker:build": "docker compose --build app",
+    "docker:up": "sh ./scripts/docker-up.sh"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
