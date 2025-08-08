@@ -17,4 +17,4 @@ if [ ! -f "$ENV_FILE" ]; then
 fi
 
 # Run Docker Compose with explicit env file
-docker compose --env-file "$ENV_FILE" up
+docker compose --env-file "$ENV_FILE" up --build

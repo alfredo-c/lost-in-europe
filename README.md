@@ -9,54 +9,67 @@ The approach uses a Map and Set to find the itinerary start and sort tickets in 
 
 ## Project setup
 
+### Docker setup
+
 ```bash
-$ npm install
+# Start a persistent database instance for local development.
+npm run docker:db:up
+
+# Start a temporary database instance (non-persistent), intended for running E2E tests locally.
+npm run docker:e2e:up
+
+# Start the application and database using Docker, and automatically run the Postman collection.
+npm run docker:up
+
 ```
 
-## Compile and run the project
+### Compile and run the project
 
 ```bash
-# Start the required Docker services:
-$ npm run docker:build
-$ npm run docker:db:up
+# Required Node.js version
+node -v
+# v22.x
 
-# development
-$ npm run start
+# Install project dependencies
+npm install
 
-# watch mode
-$ npm run start:dev
+# Run the app in development mode
+npm run start
 
-# production mode
-$ npm run start:prod
+# Run the app in watch mode (auto-restarts on file changes)
+npm run start:dev
+
+# Run the app in production mode
+npm run start:prod
+
 ```
 
 ## Run tests
 
 ```bash
-# unit tests
-$ npm run test
+# Run unit tests
+npm run test
 
-# e2e tests
-# Start the required Docker services:
-$ npm run docker:e2e:up
-$ npm run test:e2e
+# Run end-to-end (E2E) tests
+npm run test:e2e
 
-# services tests
-# Start the required Docker services:
-# Will prepare the db, app, run the postman collection
-$ npm run docker:up
+# Run full API integration tests using Docker (includes DB and Postman collection)
+npm run docker:up
 
-# test coverage
-$ npm run test:cov
+# Generate test coverage report
+npm run test:cov
+
 ```
 
 ## Migration
 
 ```bash
-# run docker-compose.db.yml to make db avaiable then create and run
-# change [name_you_want] to what the name you want for your new migration
-$ npm run migration:generate:name [name_you_want]
-$ npm run migration:run
+# Generate a new migration script
+npm run migration:generate:name [migration_name]
+
+# Run all pending migrations
+npm run migration:run
+
 ```
 
 ## API Documentation and Mock Integration
@@ -85,14 +98,6 @@ http://localhost:3000/api
 - ESlint
 - Prettier
 
-## Possibles improvement on the system design
-
-- Use the Command pattern for extensible operations and segregate writes from reads.
-- Use event-driven architecture with Kafka: create events with pending status; workers process and update to finished, to make it scalable.
-- The system is prepare to extend another types using the factory pattern.
-
----
-
 ## Algorithm & Patterns used in TicketsService.sortTickets
 
 The algorithm to sort tickets:
@@ -104,7 +109,20 @@ The algorithm to sort tickets:
 
 - This has **O(n)** time complexity because each ticket is processed once.
 - Uses **Map** and **Set** for constant-time lookups.
-- Applies the **Factory pattern** for formatting tickets of different types (`TicketFormatterFactory`).
+- Implemented the **Factory Pattern** through `TicketFormatterFactory` to support scalable extension of new ticket types.
 - Data persistence via TypeORM repository, creating entities with an `order` property for DB retrieval.
 - Throws exceptions for invalid itineraries or missing data.
 - Uses UUIDs to uniquely identify each generated itinerary.
+
+## Possible Improvements to System Design
+
+- Implement the **Command Pattern** to support extensible operations and separate write and read responsibilities.
+- Adopt an **event-driven architecture** using Kafka: create events with a pending status; workers process these events and update them to finished, improving scalability.
+
+## Next Steps
+
+- Implement CI/CD pipelines.
+- Integrate Newman for service testing, enabling canary deployments with CloudWatch alarms.
+- Add API security by implementing JWT authentication.
+
+---

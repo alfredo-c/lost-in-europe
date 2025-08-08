@@ -17,4 +17,4 @@ fi
 echo "✅ Using env file: $ENV_FILE"
 
 # Run docker-compose with only the DB service file
-docker compose -f docker-compose.db.yml --env-file "$ENV_FILE" up -d
+docker compose -f docker-compose.db.yml --env-file "$ENV_FILE" up -d --build

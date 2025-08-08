@@ -19,7 +19,7 @@ fi
 echo "✅ Using env file: $ENV_FILE"
 
 # Start DB container
-docker compose -f docker-compose.2e2.yml --env-file "$ENV_FILE" up -d
+docker compose -f docker-compose.2e2.yml --env-file "$ENV_FILE" up -d --build
 
 echo "⏳ Waiting for Postgres to be ready..."
 until docker exec local_postgres pg_isready -U "$DATABASE_USER" > /dev/null 2>&1; do
